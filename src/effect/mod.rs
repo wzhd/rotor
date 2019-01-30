@@ -1,7 +1,7 @@
 use std::io;
 
-use super::property::{Property, PrResult};
 use super::host::UserHost;
+use super::property::{PrResult, Property};
 
 #[allow(dead_code)]
 pub struct Task<'a> {
@@ -18,12 +18,12 @@ impl<'a> Task<'a> {
         }
     }
     #[allow(dead_code)]
-    pub fn apply(mut self, properties: &'a [Box<Property>])-> Task {
+    pub fn apply(mut self, properties: &'a [Box<Property>]) -> Task {
         self.properties.extend(properties.iter());
         self
     }
 
-    pub fn run(&self)-> PrResult<()> {
+    pub fn run(&self) -> PrResult<()> {
         let total = self.properties.len();
         println!("Applying {} properties to {}", total, self.user_host);
         let mut failed = 0;
@@ -36,7 +36,10 @@ impl<'a> Task<'a> {
                 match property.apply() {
                     Ok(()) => println!("[{}/{}] applied {}.", i, total, property),
                     Err(e) => {
-                        eprintln!("[{}/{}] failed to apply {} because of {}.", i, total, property, e);
+                        eprintln!(
+                            "[{}/{}] failed to apply {} because of {}.",
+                            i, total, property, e
+                        );
                         failed += 1;
                     }
                 }

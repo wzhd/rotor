@@ -19,14 +19,11 @@ impl UserHost {
     pub fn new<S: Into<String>>(user: S, host: S) -> UserHost {
         let user = user.into();
         let host = host.into();
-        UserHost {
-            user,
-            host,
-        }
+        UserHost { user, host }
     }
 
     #[allow(dead_code)]
-    pub fn apply(self, properties: &[Box<Property>])-> Task {
+    pub fn apply(self, properties: &[Box<Property>]) -> Task {
         Task::new(self, properties)
     }
 }

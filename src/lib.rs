@@ -1,18 +1,17 @@
-pub mod property;
-mod host;
-mod util;
 mod effect;
+mod host;
+pub mod property;
+mod util;
 
 pub use self::host::UserHost;
 pub use self::util::home;
 
-use self::effect::{Task};
+use self::effect::Task;
 use self::property::PrResult;
 
-pub fn default_main(tasks: Vec<Task>)-> PrResult<()> {
+pub fn default_main(tasks: Vec<Task>) -> PrResult<()> {
     for task in tasks {
-        if let Err(_e) = task.run() {
-        }
+        if let Err(_e) = task.run() {}
     }
     Ok(())
 }

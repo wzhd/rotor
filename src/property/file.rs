@@ -1,9 +1,9 @@
-use std::path::PathBuf;
 use std::collections::HashSet;
-use std::fs;
 use std::fmt;
+use std::fs;
+use std::path::PathBuf;
 
-use super::{Property, PrResult};
+use super::{PrResult, Property};
 use std::io::Write;
 
 pub struct ContainsLines {
@@ -13,21 +13,21 @@ pub struct ContainsLines {
 
 #[allow(dead_code)]
 pub fn contains_line<P, S>(file: P, line: S) -> ContainsLines
-    where P: Into<PathBuf>,
-          S: AsRef<str> {
+where
+    P: Into<PathBuf>,
+    S: AsRef<str>,
+{
     contains_lines(file, &[line])
 }
 
 pub fn contains_lines<P, S>(file: P, lines: &[S]) -> ContainsLines
-    where P: Into<PathBuf>,
-          S: AsRef<str>,
+where
+    P: Into<PathBuf>,
+    S: AsRef<str>,
 {
     let file = file.into();
     let lines = lines.iter().map(|l| l.as_ref().to_string()).collect();
-    ContainsLines{
-        file,
-        lines,
-    }
+    ContainsLines { file, lines }
 }
 
 impl ContainsLines {
@@ -73,9 +73,11 @@ impl Property for ContainsLines {
     fn apply(&self) -> PrResult<()> {
         let mut f = fs::OpenOptions::new()
             .append(true)
-            .create(true).open(&self.file)?;
+            .create(true)
+            .open(&self.file)?;
         let existing = self.existing()?;
-        let new: Vec<&str> = self.lines
+        let new: Vec<&str> = self
+            .lines
             .iter()
             .filter(|&s| !existing.contains(s))
             .map(|s| s.as_ref())
