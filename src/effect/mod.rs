@@ -2,32 +2,45 @@ use std::io;
 
 use super::host::UserHost;
 use super::property::{PrResult, Property};
+use super::types::os::OS;
 
-#[allow(dead_code)]
-pub struct Task<'a> {
-    user_host: UserHost,
-    properties: Vec<&'a Box<Property>>,
+/// Something to run
+pub trait Runnable {
+    fn run(&self) -> PrResult<()>;
 }
 
-impl<'a> Task<'a> {
-    pub fn new(user_host: UserHost, properties: &'a [Box<Property>]) -> Task {
-        let properties = properties.iter().collect();
+#[allow(dead_code)]
+pub struct Task<T: OS> {
+    user_host: UserHost<T>,
+    properties: Vec<Box<dyn Property<T>>>,
+}
+
+/// Records what needs to be done and do it when `run` is called
+impl<T: OS> Task<T> {
+    pub fn new(user_host: UserHost<T>, properties: &[Box<dyn Property<T>>]) -> Task<T> {
+        let properties = properties.iter()
+            .map(|p| {
+                p.clone()
+            }).
+            collect();
         Task {
             user_host,
             properties,
         }
     }
     #[allow(dead_code)]
-    pub fn apply(mut self, properties: &'a [Box<Property>]) -> Task {
-        self.properties.extend(properties.iter());
+    pub fn apply(mut self, properties: &[Box<dyn Property<T>>]) -> Task<T> {
+        self.properties.extend(properties.iter().map(|p| p.clone()));
         self
     }
+}
 
-    pub fn run(&self) -> PrResult<()> {
+impl<T: OS> Runnable for Task<T> {
+    fn run(&self) -> PrResult<()> {
         let total = self.properties.len();
         println!("Applying {} properties to {}", total, self.user_host);
         let mut failed = 0;
-        for (&property, i) in self.properties.iter().zip(1..) {
+        for (property, i) in self.properties.iter().zip(1..) {
             let ok = property.check()?;
             if ok {
                 println!("[{}/{}] {} already true.", i, total, property);

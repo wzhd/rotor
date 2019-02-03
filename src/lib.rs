@@ -1,16 +1,18 @@
 mod effect;
 mod host;
 pub mod property;
+mod types;
 mod util;
 
 pub use self::host::UserHost;
+pub use self::types::os::*;
 pub use self::util::home;
 
-use self::effect::Task;
+pub use self::effect::Runnable;
 use self::property::PrResult;
 
-pub fn default_main(tasks: Vec<Task>) -> PrResult<()> {
-    for task in tasks {
+pub fn default_main(tasks: Vec<Box<dyn Runnable>>) -> PrResult<()> {
+    for task in tasks.iter() {
         if let Err(_e) = task.run() {}
     }
     Ok(())

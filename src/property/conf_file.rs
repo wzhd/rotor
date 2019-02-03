@@ -1,11 +1,12 @@
 use crate::property::PrResult;
-use crate::property::Property;
+use crate::property::{os::Any, Property};
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::fs;
 use std::io::{BufWriter, Write};
 use std::path::PathBuf;
 
+#[derive(Clone)]
 pub struct ConfFile {
     path: PathBuf,
     comment: char,
@@ -21,6 +22,7 @@ pub fn conf_file<P: Into<PathBuf>>(file: P, comment: char, equal: char) -> ConfF
     }
 }
 
+#[derive(Clone)]
 pub struct ConfFileAssignments {
     file: ConfFile,
     assignments: HashMap<String, String>,
@@ -70,7 +72,7 @@ fn line_key_value(line: &str, comment: char, equal: char) -> Option<(&str, &str)
     Some((key, value))
 }
 
-impl Property for ConfFileAssignments {
+impl Property<Any> for ConfFileAssignments {
     fn check(&self) -> PrResult<bool> {
         let mut needed: HashSet<&str> = self
             .assignments

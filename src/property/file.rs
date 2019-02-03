@@ -1,11 +1,27 @@
 use std::collections::HashSet;
 use std::fmt;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
+use super::os::Any;
 use super::{PrResult, Property};
 use std::io::Write;
 
+pub fn file<'a, P: 'a + AsRef<Path>>(path: P) -> ManagedFile<P> {
+    ManagedFile { path }
+}
+
+/// A file that has its content managed by this program
+pub struct ManagedFile<P: AsRef<Path>> {
+    path: P,
+}
+
+impl<P: AsRef<Path>> ManagedFile<P> {
+    /// Content of the file is exactly the same as the provided bytes
+    pub fn has_bytes(&self, bytes: &[u8]) {}
+}
+
+#[derive(Clone)]
 pub struct ContainsLines {
     file: PathBuf,
     lines: Vec<String>,
@@ -59,7 +75,7 @@ impl fmt::Display for ContainsLines {
     }
 }
 
-impl Property for ContainsLines {
+impl Property<Any> for ContainsLines {
     fn check(&self) -> PrResult<bool> {
         let existing = self.existing()?;
         for line in self.lines.iter() {
