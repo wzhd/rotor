@@ -1,10 +1,9 @@
 use std::fmt::Display;
 use std::io;
 
-mod conf_file;
+pub mod conf_file;
 pub mod file;
 
-pub use self::conf_file::conf_file;
 pub use super::types::os::{self, OS};
 
 pub type PrResult<T> = io::Result<T>;
@@ -13,7 +12,6 @@ pub trait Property<O: OS>: Display + PropertyClone<O> {
     fn check(&self) -> PrResult<bool>;
     fn apply(&self) -> PrResult<()>;
 }
-
 
 impl<T> Property<os::Linux> for T
 where

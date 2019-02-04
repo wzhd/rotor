@@ -1,17 +1,48 @@
 use dirs::home_dir;
+use std::fmt;
 use std::io;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
-pub fn home<P: AsRef<Path>>(rel: P) -> io::Result<PathBuf> {
-    let home = home_dir()
-        .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "User home not found."))?;
-    let rel = rel.as_ref();
-    if rel.is_absolute() {
-        return Err(io::Error::new(
-            io::ErrorKind::InvalidInput,
-            "Not a relative path in home",
-        ));
+/// Relative paths are considered relative to user's home directory
+#[derive(Clone)]
+pub enum UserPathBuf {
+    Home(PathBuf),
+    Absolute(PathBuf),
+}
+
+impl fmt::Debug for UserPathBuf {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        match self {
+            UserPathBuf::Home(p) => {
+                write!(f, "~/{:?}", p)?;
+            }
+            UserPathBuf::Absolute(p) => write!(f, "{:?}", p)?,
+        }
+        Ok(())
     }
-    let path = home.join(rel);
-    Ok(path)
+}
+
+impl<P: Into<PathBuf>> From<P> for UserPathBuf {
+    fn from(p: P) -> Self {
+        let p = p.into();
+        if p.is_relative() {
+            UserPathBuf::Home(p)
+        } else {
+            UserPathBuf::Absolute(p)
+        }
+    }
+}
+
+impl UserPathBuf {
+    pub fn expand_user(&self) -> io::Result<PathBuf> {
+        match self {
+            UserPathBuf::Absolute(p) => Ok(p.clone()),
+            UserPathBuf::Home(p) => {
+                let home = home_dir().ok_or_else(|| {
+                    io::Error::new(io::ErrorKind::NotFound, "User home not found.")
+                })?;
+                Ok(home.join(p))
+            }
+        }
+    }
 }

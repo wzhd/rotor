@@ -1,25 +1,16 @@
 use crate::property::PrResult;
 use crate::property::{os::Any, Property};
+use crate::util::UserPathBuf;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::fs;
 use std::io::{BufWriter, Write};
-use std::path::PathBuf;
 
 #[derive(Clone)]
 pub struct ConfFile {
-    path: PathBuf,
-    comment: char,
-    equal: char,
-}
-
-pub fn conf_file<P: Into<PathBuf>>(file: P, comment: char, equal: char) -> ConfFile {
-    let file = file.into();
-    ConfFile {
-        path: file,
-        comment,
-        equal,
-    }
+    pub path: UserPathBuf,
+    pub comment: char,
+    pub equal: char,
 }
 
 #[derive(Clone)]
@@ -80,7 +71,8 @@ impl Property<Any> for ConfFileAssignments {
             .into_iter()
             .map(|s| s.as_ref())
             .collect();
-        let contents = fs::read_to_string(&self.file.path)?;
+        let path = self.file.path.expand_user()?;
+        let contents = fs::read_to_string(&path)?;
         for line in contents.lines() {
             if let Some((k, v_curr)) = line_key_value(line, self.file.comment, self.file.equal) {
                 if let Some(v_req) = self.assignments.get(k) {
@@ -96,7 +88,8 @@ impl Property<Any> for ConfFileAssignments {
     }
 
     fn apply(&self) -> PrResult<()> {
-        let contents = fs::read_to_string(&self.file.path)?;
+        let path = self.file.path.expand_user()?;
+        let contents = fs::read_to_string(&path)?;
         let mut needed: HashSet<&str> = self
             .assignments
             .keys()
@@ -106,7 +99,7 @@ impl Property<Any> for ConfFileAssignments {
         let f = fs::OpenOptions::new()
             .write(true)
             .truncate(true)
-            .open(&self.file.path)?;
+            .open(&path)?;
         let mut writer = BufWriter::new(f);
         for line in contents.lines() {
             if let Some((k, v_curr)) = line_key_value(line, self.file.comment, self.file.equal) {

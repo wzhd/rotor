@@ -18,11 +18,7 @@ pub struct Task<T: OS> {
 /// Records what needs to be done and do it when `run` is called
 impl<T: OS> Task<T> {
     pub fn new(user_host: UserHost<T>, properties: &[Box<dyn Property<T>>]) -> Task<T> {
-        let properties = properties.iter()
-            .map(|p| {
-                p.clone()
-            }).
-            collect();
+        let properties = properties.iter().map(|p| p.clone()).collect();
         Task {
             user_host,
             properties,

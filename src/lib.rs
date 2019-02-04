@@ -6,7 +6,6 @@ mod util;
 
 pub use self::host::UserHost;
 pub use self::types::os::*;
-pub use self::util::home;
 
 pub use self::effect::Runnable;
 use self::property::PrResult;
