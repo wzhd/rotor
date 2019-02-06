@@ -64,7 +64,7 @@ impl Property<Any> for ContainsLines {
                 return Ok(false);
             }
         }
-        return Ok(true);
+        Ok(true)
     }
 
     fn apply(&self) -> PrResult<()> {

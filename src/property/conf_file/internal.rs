@@ -1,6 +1,6 @@
-use crate::property::PrResult;
-use crate::property::{os::Any, Property};
 use crate::util::UserPathBuf;
+use crate::PrResult;
+use crate::{os::Any, property::Property};
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 use std::fs;
@@ -65,12 +65,7 @@ fn line_key_value(line: &str, comment: char, equal: char) -> Option<(&str, &str)
 
 impl Property<Any> for ConfFileAssignments {
     fn check(&self) -> PrResult<bool> {
-        let mut needed: HashSet<&str> = self
-            .assignments
-            .keys()
-            .into_iter()
-            .map(|s| s.as_ref())
-            .collect();
+        let mut needed: HashSet<&str> = self.assignments.keys().map(|s| s.as_ref()).collect();
         let path = self.file.path.expand_user()?;
         let contents = fs::read_to_string(&path)?;
         for line in contents.lines() {
@@ -84,18 +79,13 @@ impl Property<Any> for ConfFileAssignments {
                 }
             }
         }
-        Ok(if needed.len() > 0 { false } else { true })
+        Ok(needed.is_empty())
     }
 
     fn apply(&self) -> PrResult<()> {
         let path = self.file.path.expand_user()?;
         let contents = fs::read_to_string(&path)?;
-        let mut needed: HashSet<&str> = self
-            .assignments
-            .keys()
-            .into_iter()
-            .map(|s| s.as_ref())
-            .collect();
+        let mut needed: HashSet<&str> = self.assignments.keys().map(|s| s.as_ref()).collect();
         let f = fs::OpenOptions::new()
             .write(true)
             .truncate(true)
@@ -108,7 +98,7 @@ impl Property<Any> for ConfFileAssignments {
                     if v_curr != v_req {
                         println!("Replacing value of {} {} with {}", k, v_curr, v_req);
                         writer.write_all(k.as_bytes())?;
-                        writer.write_all(&char_bytes(&self.file.equal))?;
+                        writer.write_all(&char_bytes(self.file.equal))?;
                         writer.write_all(v_req.as_bytes())?;
                         writer.write_all("\n".as_bytes())?;
                         continue;
@@ -119,7 +109,7 @@ impl Property<Any> for ConfFileAssignments {
             writer.write_all("\n".as_bytes())?;
         }
         for k in needed {
-            let v = self.assignments.get(k).unwrap();
+            let v = &self.assignments[k];
             let line = format!("{}{}{}\n", k, self.file.equal, v);
             print!("Adding {}", line);
             writer.write_all(line.as_bytes())?;
@@ -129,7 +119,7 @@ impl Property<Any> for ConfFileAssignments {
     }
 }
 
-fn char_bytes(c: &char) -> Vec<u8> {
+fn char_bytes(c: char) -> Vec<u8> {
     let mut buf = vec![0u8; 4];
     c.encode_utf8(&mut buf);
     buf.truncate(c.len_utf8());

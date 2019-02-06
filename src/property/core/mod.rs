@@ -8,5 +8,5 @@ pub use self::list::PropertyList;
 use crate::os::OS;
 
 pub fn prop<O: OS>() -> PropertyList<O> {
-    PropertyList::new()
+    PropertyList::default()
 }

@@ -15,15 +15,14 @@ use std::io;
 
 pub type PrResult<T> = io::Result<T>;
 
+#[derive(Default)]
 pub struct RotorBuilder {
     hosts: HashMap<String, Box<dyn ConfigureUser>>,
 }
 
 impl RotorBuilder {
     pub fn new() -> RotorBuilder {
-        RotorBuilder {
-            hosts: HashMap::new(),
-        }
+        Default::default()
     }
 
     pub fn host<O: os::OS + 'static>(

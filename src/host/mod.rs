@@ -23,9 +23,9 @@ impl<O: OS> ConfigureUser for HostUsersConf<O> {
                 return user.properties.run();
             }
         }
-        return Err(io::Error::new(
+        Err(io::Error::new(
             io::ErrorKind::NotFound,
             format!("User {} not configured", user_name),
-        ));
+        ))
     }
 }
