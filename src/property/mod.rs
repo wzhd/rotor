@@ -2,7 +2,10 @@ use std::fmt::Display;
 use std::io;
 
 pub mod conf_file;
+mod core;
 pub mod file;
+
+pub use self::core::{prop, PropertyList};
 
 pub use super::types::os::{self, OS};
 

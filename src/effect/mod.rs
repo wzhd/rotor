@@ -3,13 +3,13 @@ use std::io;
 use super::host::UserHost;
 use super::property::{PrResult, Property};
 use super::types::os::OS;
+use crate::property::PropertyList;
 
 /// Something to run
 pub trait Runnable {
     fn run(&self) -> PrResult<()>;
 }
 
-#[allow(dead_code)]
 pub struct Task<T: OS> {
     user_host: UserHost<T>,
     properties: Vec<Box<dyn Property<T>>>,
@@ -24,17 +24,16 @@ impl<T: OS> Task<T> {
             properties,
         }
     }
-    #[allow(dead_code)]
     pub fn apply(mut self, properties: &[Box<dyn Property<T>>]) -> Task<T> {
         self.properties.extend(properties.iter().map(|p| p.clone()));
         self
     }
 }
 
-impl<T: OS> Runnable for Task<T> {
+impl<T: OS> Runnable for PropertyList<T> {
     fn run(&self) -> PrResult<()> {
         let total = self.properties.len();
-        println!("Applying {} properties to {}", total, self.user_host);
+        println!("Applying {} properties", total);
         let mut failed = 0;
         for (property, i) in self.properties.iter().zip(1..) {
             let ok = property.check()?;
