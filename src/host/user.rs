@@ -1,6 +1,5 @@
-use crate::property::OS;
-
 use super::super::property::PropertyList;
+use crate::os::OS;
 
 pub struct HostUsersConf<O: OS> {
     pub users: Vec<UserConf<O>>,

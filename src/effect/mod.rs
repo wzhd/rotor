@@ -1,33 +1,12 @@
 use std::io;
 
-use super::host::UserHost;
-use super::property::{PrResult, Property};
 use super::types::os::OS;
+use super::PrResult;
 use crate::property::PropertyList;
 
 /// Something to run
-pub trait Runnable {
+pub(super) trait Runnable {
     fn run(&self) -> PrResult<()>;
-}
-
-pub struct Task<T: OS> {
-    user_host: UserHost<T>,
-    properties: Vec<Box<dyn Property<T>>>,
-}
-
-/// Records what needs to be done and do it when `run` is called
-impl<T: OS> Task<T> {
-    pub fn new(user_host: UserHost<T>, properties: &[Box<dyn Property<T>>]) -> Task<T> {
-        let properties = properties.iter().map(|p| p.clone()).collect();
-        Task {
-            user_host,
-            properties,
-        }
-    }
-    pub fn apply(mut self, properties: &[Box<dyn Property<T>>]) -> Task<T> {
-        self.properties.extend(properties.iter().map(|p| p.clone()));
-        self
-    }
 }
 
 impl<T: OS> Runnable for PropertyList<T> {

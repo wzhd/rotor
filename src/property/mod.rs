@@ -1,5 +1,4 @@
 use std::fmt::Display;
-use std::io;
 
 pub mod conf_file;
 mod core;
@@ -7,15 +6,16 @@ pub mod file;
 
 pub use self::core::{prop, PropertyList};
 
-pub use super::types::os::{self, OS};
-
-pub type PrResult<T> = io::Result<T>;
+use self::core::PropertyClone;
+use super::types::os::{self, OS};
+use crate::PrResult;
 
 pub trait Property<O: OS>: Display + PropertyClone<O> {
     fn check(&self) -> PrResult<bool>;
     fn apply(&self) -> PrResult<()>;
 }
 
+// Properties that apply to any OS also apply to Linux
 impl<T> Property<os::Linux> for T
 where
     T: Property<os::Any> + Clone + 'static,
@@ -28,6 +28,7 @@ where
     }
 }
 
+// Properties that apply to any Linux also apply to ArchLinux
 impl<T> Property<os::ArchLinux> for T
 where
     T: Property<os::Linux> + Clone + 'static,
@@ -40,6 +41,7 @@ where
     }
 }
 
+// Properties that apply to any Linux also apply to Debian derivatives
 impl<T> Property<os::DebianLike> for T
 where
     T: Property<os::Linux> + Clone + 'static,
@@ -49,22 +51,5 @@ where
     }
     fn apply(&self) -> PrResult<()> {
         T::apply(self)
-    }
-}
-
-/// Workaround
-pub trait PropertyClone<O> {
-    fn clone_box(&self) -> Box<Property<O>>;
-}
-
-impl<P: 'static + Property<O> + Clone, O: OS> PropertyClone<O> for P {
-    fn clone_box(&self) -> Box<Property<O>> {
-        Box::new(self.clone())
-    }
-}
-
-impl<O: OS> Clone for Box<Property<O>> {
-    fn clone(&self) -> Box<Property<O>> {
-        self.clone_box()
     }
 }
