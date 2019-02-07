@@ -1,8 +1,10 @@
 use std::fmt::Display;
 
+pub mod apt;
 pub mod conf_file;
 mod core;
 pub mod file;
+pub mod pacman;
 
 pub use self::core::{prop, PropertyList};
 
