@@ -4,6 +4,7 @@ pub mod apt;
 pub mod conf_file;
 mod core;
 pub mod file;
+pub mod git;
 pub mod pacman;
 
 pub use self::core::{prop, PropertyList};
