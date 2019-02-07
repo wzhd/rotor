@@ -15,20 +15,29 @@ impl<T: OS> Runnable for PropertyList<T> {
         println!("Applying {} properties", total);
         let mut failed = 0;
         for (property, i) in self.properties.iter().zip(1..) {
-            let ok = property.check()?;
-            if ok {
-                println!("[{}/{}] {} already true.", i, total, property);
-            } else {
-                println!("[{}/{}] applying {}.", i, total, property);
-                match property.apply() {
-                    Ok(()) => println!("[{}/{}] applied {}.", i, total, property),
-                    Err(e) => {
-                        eprintln!(
-                            "[{}/{}] failed to apply {} because of {}.",
-                            i, total, property, e
-                        );
-                        failed += 1;
+            match property.check() {
+                Ok(true) => {
+                    println!("[{}/{}] {}: YES!", i, total, property);
+                }
+                Ok(false) => {
+                    println!("[{}/{}] {}: applying", i, total, property);
+                    match property.apply() {
+                        Ok(()) => println!("[{}/{}] applied.", i, total),
+                        Err(e) => {
+                            eprintln!(
+                                "[{}/{}] failed to apply {} because of {}.",
+                                i, total, property, e
+                            );
+                            failed += 1;
+                        }
                     }
+                }
+                Err(e) => {
+                    failed += 1;
+                    eprintln!(
+                        "[{}/{}] error while checking {}: {}.",
+                        i, total, property, e
+                    );
                 }
             }
         }
