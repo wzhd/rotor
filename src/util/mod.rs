@@ -3,6 +3,8 @@ use std::fmt;
 use std::io;
 use std::path::PathBuf;
 
+pub mod cmd;
+
 /// Relative paths are considered relative to user's home directory
 #[derive(Clone)]
 pub enum UserPathBuf {
