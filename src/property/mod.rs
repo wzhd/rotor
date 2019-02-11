@@ -3,11 +3,13 @@ use std::fmt::Display;
 pub mod apt;
 pub mod conf_file;
 mod core;
-pub mod file;
+pub mod dir;
+mod file;
 pub mod git;
 pub mod pacman;
 
 pub use self::core::{prop, PropertyList};
+pub use self::file::file;
 
 use self::core::PropertyClone;
 use super::types::os::{self, OS};

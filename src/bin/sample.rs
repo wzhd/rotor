@@ -1,11 +1,31 @@
 use std::io;
 
 use rotor::os;
-use rotor::property::{apt, conf_file, file::file, git, pacman};
+use rotor::property::{apt, conf_file, dir, file, git, pacman};
 use rotor::{prop, user, RotorBuilder};
 
 fn main() -> io::Result<()> {
     RotorBuilder::new()
+        .host("teufelsschloss",
+              user("flandre", prop::<os::ArchLinux>()
+                  // Relative paths are treated as paths in the home directory.
+                  + dir::path("dotfiles")
+                  // Manage symlinks in a way similar to GNU Stow. But
+                  // only links to files are used. Directory structure
+                  // is just recreated.
+                  .as_package_source()
+                  // Create links for files in these packages.
+                  .linked_all(&[
+                      "compton", "ga-ncdu",  "gpd-power", "guile",
+                      "nvchecker", "tdrop", "th", "usbiprpi", "vim",
+                  ])
+                  // Remove symlinks pointing to files with the same relative path in these packages.
+                  .unlinked_all(&[
+                      "alacritty", "aurorae-kv-glass", "awesome34",
+                      "fcitx5", "firefox", "fontconfig", "netctl",
+                  ])
+              )
+        )
         .host("192.168.1.1",
               user("root", prop::<os::DebianLike>()
                   + apt::installed("vim")

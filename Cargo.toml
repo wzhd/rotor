@@ -6,4 +6,7 @@ edition = "2018"
 
 [dependencies]
 dirs = "1"
+pathdiff = "0.1"
 structopt = "0.2"
+same-file = "1"
+walkdir = "2"
